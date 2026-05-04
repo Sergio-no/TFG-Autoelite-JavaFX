@@ -12,10 +12,14 @@
         <VBox>
             <HBox alignment="CENTER_LEFT" spacing="10"
                   style="-fx-padding:12 20; -fx-background-color:#1a1d23;
-                         -fx-border-color:#2e333d; -fx-border-width:0 0 1 0;">
+             -fx-border-color:#2e333d; -fx-border-width:0 0 1 0;">
                 <Label text="Estadísticas" styleClass="text-primary"
                        style="-fx-font-size:15px; -fx-font-weight:500;"/>
                 <Region HBox.hgrow="ALWAYS"/>
+                <ComboBox fx:id="mesCombo" styleClass="input-field"
+                          prefWidth="150" style="-fx-pref-height:32; -fx-font-size:12px;"/>
+                <ComboBox fx:id="anioCombo" styleClass="input-field"
+                          prefWidth="90" style="-fx-pref-height:32; -fx-font-size:12px;"/>
                 <Label fx:id="periodoLabel" styleClass="text-muted"
                        style="-fx-font-size:12px;"/>
             </HBox>

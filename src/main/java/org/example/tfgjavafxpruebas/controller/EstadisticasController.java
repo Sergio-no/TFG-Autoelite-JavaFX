@@ -24,6 +24,10 @@ import java.time.format.TextStyle;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import java.time.Month;
+import java.time.Year;
+import javafx.scene.control.ComboBox;
+
 public class EstadisticasController extends BaseController implements Initializable {
 
     @FXML private Label metricIngresos;
@@ -31,6 +35,9 @@ public class EstadisticasController extends BaseController implements Initializa
     @FXML private Label metricTicket;
     @FXML private Label metricValoracion;
     @FXML private Label periodoLabel;
+
+    @FXML private ComboBox<String> mesCombo;
+    @FXML private ComboBox<Integer> anioCombo;
 
     @FXML private StackPane chartMecanicosContainer;
     @FXML private StackPane chartValoracionesContainer;
@@ -53,6 +60,8 @@ public class EstadisticasController extends BaseController implements Initializa
     private List<Valoracion> todasValoraciones = new ArrayList<>();
     private String mecanicoSeleccionado = null;
     private String valoracionSeleccionada = null;
+    private int mesSeleccionado;
+    private int anioSeleccionado;
 
     private static final String[] COLORES_MECANICOS = {
             "#7ec8e3", "#4ade80", "#d4a72c", "#c084fc",
@@ -67,9 +76,39 @@ public class EstadisticasController extends BaseController implements Initializa
         initUserLabel();
 
         LocalDate hoy = LocalDate.now();
-        periodoLabel.setText(
-                hoy.getMonth().getDisplayName(TextStyle.FULL, new Locale("es"))
-                        + " " + hoy.getYear());
+        mesSeleccionado = hoy.getMonthValue();
+        anioSeleccionado = hoy.getYear();
+
+        // Configurar combo de meses
+        if (mesCombo != null) {
+            for (int i = 1; i <= 12; i++) {
+                mesCombo.getItems().add(
+                        Month.of(i).getDisplayName(TextStyle.FULL, new Locale("es"))
+                );
+            }
+            mesCombo.getSelectionModel().select(mesSeleccionado - 1);
+            mesCombo.setOnAction(e -> {
+                mesSeleccionado = mesCombo.getSelectionModel().getSelectedIndex() + 1;
+                actualizarPeriodoLabel();
+                cargarAsync();
+            });
+        }
+
+        // Configurar combo de años
+        if (anioCombo != null) {
+            int anioActual = hoy.getYear();
+            for (int a = anioActual - 3; a <= anioActual; a++) {
+                anioCombo.getItems().add(a);
+            }
+            anioCombo.getSelectionModel().select(Integer.valueOf(anioActual));
+            anioCombo.setOnAction(e -> {
+                anioSeleccionado = anioCombo.getValue();
+                actualizarPeriodoLabel();
+                cargarAsync();
+            });
+        }
+
+        actualizarPeriodoLabel();
 
         colMecNombre  .setCellValueFactory(new PropertyValueFactory<>("nombre"));
         colMecRep     .setCellValueFactory(new PropertyValueFactory<>("reparaciones"));
@@ -82,11 +121,19 @@ public class EstadisticasController extends BaseController implements Initializa
         cargarAsync();
     }
 
+    private void actualizarPeriodoLabel() {
+        String nombreMes = Month.of(mesSeleccionado)
+                .getDisplayName(TextStyle.FULL, new Locale("es"));
+        // Capitalizar primera letra
+        nombreMes = nombreMes.substring(0, 1).toUpperCase() + nombreMes.substring(1);
+        periodoLabel.setText(nombreMes + " " + anioSeleccionado);
+    }
+
     private void cargarAsync() {
         new Thread(() -> {
             try {
                 // Una sola llamada HTTP para todo
-                JsonNode raw = service.getRaw();
+                JsonNode raw = service.getRaw(mesSeleccionado, anioSeleccionado);
                 List<MecanicoStats> mecanicos = service.getMecanicoStatsFromNode(raw);
                 List<Valoracion> valoraciones = service.getUltimasValoracionesFromNode(raw);
 

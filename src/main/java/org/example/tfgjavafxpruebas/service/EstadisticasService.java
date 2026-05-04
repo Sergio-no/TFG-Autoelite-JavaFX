@@ -21,7 +21,23 @@ public class EstadisticasService {
     private String token() { return "Bearer " + UserSesion.getInstance().getToken(); }
 
     /**
-     * Una sola llamada al backend que devuelve todo.
+     * Llamada con mes y año específicos.
+     */
+    public JsonNode getRaw(int mes, int anio) throws Exception {
+        HttpResponse<String> r = client.send(
+                HttpRequest.newBuilder()
+                        .uri(URI.create(BASE + "/estadisticas?mes=" + mes + "&anio=" + anio))
+                        .header("Authorization", token())
+                        .GET().build(),
+                HttpResponse.BodyHandlers.ofString());
+        if (r.statusCode() != 200) {
+            throw new RuntimeException("Error HTTP " + r.statusCode() + ": " + r.body());
+        }
+        return mapper.readTree(r.body());
+    }
+
+    /**
+     * Llamada sin parámetros (mes actual).
      */
     public JsonNode getRaw() throws Exception {
         HttpResponse<String> r = client.send(
