@@ -25,8 +25,9 @@ public class RegisterController {
 
     @FXML
     public void initialize() {
-        rolCombo.getItems().addAll("CLIENTE", "OFICINA", "JEFE");
-        rolCombo.setValue("CLIENTE");
+        // Solo roles de gestión — los clientes se registran desde la app móvil
+        rolCombo.getItems().addAll("OFICINA", "JEFE");
+        rolCombo.setValue("OFICINA");
     }
 
     @FXML
