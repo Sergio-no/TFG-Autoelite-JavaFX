@@ -82,7 +82,18 @@ public class CitasController extends BaseController implements Initializable {
             }
             @Override protected void updateItem(Void v, boolean empty) {
                 super.updateItem(v, empty);
-                setGraphic(empty ? null : box);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    Cita c = getTableView().getItems().get(getIndex());
+                    String estado = c.getEstado();
+                    boolean bloqueado = "CANCELADA".equals(estado)
+                            || "CONFIRMADA".equals(estado)
+                            || "FINALIZADA".equals(estado);
+                    confirmar.setDisable(bloqueado);
+                    cancelar.setDisable(bloqueado);
+                    setGraphic(box);
+                }
             }
         });
     }
